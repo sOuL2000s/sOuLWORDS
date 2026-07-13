@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function LetterWheel({ letters, onWordComplete }) {
+export default function LetterWheel({ letters, onWordComplete, onLetterSelect }) { // Added onLetterSelect
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -21,12 +21,16 @@ export default function LetterWheel({ letters, onWordComplete }) {
 
   const handleMouseDown = (i) => {
     setIsDragging(true);
+    const newSelection = [{ letter: letters[i], index: i }];
     setSelectedIndices([i]);
+    onLetterSelect(newSelection); // Notify parent of selection
   };
 
   const handleMouseEnter = (i) => {
     if (isDragging && !selectedIndices.includes(i)) {
-      setSelectedIndices([...selectedIndices, i]);
+      const newSelectionIndices = [...selectedIndices, i];
+      setSelectedIndices(newSelectionIndices);
+      onLetterSelect(newSelectionIndices.map(idx => ({ letter: letters[idx], index: idx }))); // Notify parent
     }
   };
 
@@ -36,18 +40,33 @@ export default function LetterWheel({ letters, onWordComplete }) {
     onWordComplete(word);
     setIsDragging(false);
     setSelectedIndices([]);
+    onLetterSelect([]); // Clear selection in parent
   };
 
+  // Handle global mouse up to stop dragging even if mouse leaves the wheel
   useEffect(() => {
     window.addEventListener('mouseup', handleGlobalMouseUp);
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
-  }, [selectedIndices, isDragging]);
+  }, [selectedIndices, isDragging, letters, onWordComplete, onLetterSelect]); // Added dependencies
+
+  // Effect to update parent's selected letters when local selectedIndices changes
+  useEffect(() => {
+    if (!isDragging) {
+      onLetterSelect([]); // Clear if not dragging
+    } else {
+      onLetterSelect(selectedIndices.map(idx => ({ letter: letters[idx], index: idx })));
+    }
+  }, [selectedIndices, isDragging, letters, onLetterSelect]);
+
 
   return (
     <div className="relative w-64 h-64 touch-none select-none" ref={containerRef}
          onMouseMove={(e) => {
-           const rect = containerRef.current.getBoundingClientRect();
-           setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+           // Only update mousePos if dragging and containerRef is present
+           if (isDragging && containerRef.current) {
+             const rect = containerRef.current.getBoundingClientRect();
+             setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+           }
          }}>
       
       <svg className="absolute inset-0 w-full h-full pointer-events-none">

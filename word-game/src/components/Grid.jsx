@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function Grid({ grid, foundWords }) {
+export default function Grid({ grid, foundStatus }) { // Changed prop name
+  const { foundWords, revealedCells } = foundStatus; // Destructure foundStatus
+
   return (
     <div className="grid gap-2 p-4">
       {grid.map((row, rowIndex) => (
@@ -12,7 +14,7 @@ export default function Grid({ grid, foundWords }) {
               {cell.char && (
                 <motion.span
                   initial={{ scale: 0 }}
-                  animate={{ scale: isFound(cell.char, rowIndex, cellIndex, foundWords, grid) ? 1 : 0 }}
+                  animate={{ scale: isCellRevealed(cell, foundWords, revealedCells) ? 1 : 0 }} // Use new function
                   className="text-xl font-bold text-white uppercase"
                 >
                   {cell.char}
@@ -26,11 +28,17 @@ export default function Grid({ grid, foundWords }) {
   );
 }
 
-// Logic to check if a specific cell belongs to a word that has been found
-function isFound(char, r, c, foundWords, grid) {
-  return foundWords.some(word => {
-    // This is a simplified check. In a production app, 
-    // you'd map grid cells to specific word IDs.
-    return true; // For this demo, if the word is found, all chars are revealed.
-  });
+// Logic to check if a specific cell belongs to a word that has been found or is explicitly revealed by a hint
+function isCellRevealed(cell, foundWords, revealedCells) {
+  if (!cell.char || !cell.words) return false;
+
+  // Check if any of the words this cell belongs to are in the foundWords list
+  const partOfFoundWord = cell.words.some(wordInfo =>
+    foundWords.includes(wordInfo.word)
+  );
+
+  // Check if this specific cell has been explicitly revealed by a hint
+  const isExplicitlyRevealed = revealedCells[`${cell.id}`]; // Check using the cell's unique ID
+
+  return partOfFoundWord || isExplicitlyRevealed;
 }
