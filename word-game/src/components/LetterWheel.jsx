@@ -7,7 +7,8 @@ export default function LetterWheel({ letters, onWordComplete, onLetterSelect })
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
 
-  const radius = 80;
+  const radius = 80; // This will effectively be relative to the wheel size
+  // Center coordinates for a 250x250 logical area (which will be scaled by CSS)
   const centerX = 125;
   const centerY = 125;
 
@@ -60,16 +61,21 @@ export default function LetterWheel({ letters, onWordComplete, onLetterSelect })
 
 
   return (
-    <div className="relative w-64 h-64 touch-none select-none" ref={containerRef}
+    <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 touch-none select-none max-w-[calc(100vw-4rem)] max-h-[calc(100vw-4rem)] aspect-square" ref={containerRef}
          onMouseMove={(e) => {
-           // Only update mousePos if dragging and containerRef is present
            if (isDragging && containerRef.current) {
              const rect = containerRef.current.getBoundingClientRect();
-             setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+             // Calculate mouse position relative to the scaled SVG viewbox
+             const scaleX = 250 / rect.width; // 250 is the internal SVG logical width
+             const scaleY = 250 / rect.height; // 250 is the internal SVG logical height
+             setMousePos({
+               x: (e.clientX - rect.left) * scaleX,
+               y: (e.clientY - rect.top) * scaleY
+             });
            }
          }}>
       
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      <svg viewBox="0 0 250 250" className="absolute inset-0 w-full h-full pointer-events-none">
         {/* Lines between selected letters */}
         {selectedIndices.length > 0 && (
           <polyline
@@ -98,7 +104,8 @@ export default function LetterWheel({ letters, onWordComplete, onLetterSelect })
             onMouseEnter={() => handleMouseEnter(i)}
             className={`absolute flex items-center justify-center w-12 h-12 rounded-full cursor-pointer transition-colors
               ${isSelected ? 'bg-blue-500 text-white shadow-lg scale-110' : 'bg-white text-gray-800 border-2'}`}
-            style={{ left: x - 24, top: y - 24 }}
+            // Adjust letter positioning to be relative to the SVG's internal coordinate system
+            style={{ left: `calc(${(x / 250) * 100}% - 24px)`, top: `calc(${(y / 250) * 100}% - 24px)` }}
             whileHover={{ scale: 1.1 }}
           >
             <span className="text-xl font-bold">{letter}</span>

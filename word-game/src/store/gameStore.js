@@ -22,8 +22,9 @@ export const useGameStore = create(
       name: 'word-game-storage', // unique name for local storage
       partialize: (state) => ({ 
         currentLevel: state.currentLevel, 
-        coins: state.coins 
-      }), // only persist currentLevel and coins
+        coins: state.coins,
+        foundWords: state.foundWords // Persist found words for the current level
+      }),
     }
   )
 );
