@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { DEFAULT_STARTING_COINS } from '../config/gameConfig'; // Import default coins
 
 export const useGameStore = create(
   persist(
     (set) => ({
       currentLevel: 0,
-      coins: 200,
+      coins: DEFAULT_STARTING_COINS, // Use constant for starting coins
       foundWords: [],
       selectedLetters: [],
       isWin: false,

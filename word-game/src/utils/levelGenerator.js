@@ -1,5 +1,6 @@
 // src/utils/levelGenerator.js
-import WORD_LIST from '../data/wordlist';
+import WORD_LIST from '../data/wordlist'; // Keep the existing import
+import { GRID_SIZE_MAX } from '../config/gameConfig'; // Import GRID_SIZE_MAX
 
 // Helper to shuffle an array (Fisher-Yates algorithm)
 export function shuffleArray(array) { // Exported for use in App.jsx
@@ -57,7 +58,7 @@ function generateCrosswordGrid(wordsToPlace) {
     return { grid: [], allLetters: [], answers: [] };
   }
 
-  const GRID_SIZE = 15; // Max grid size (can be adjusted)
+  const GRID_SIZE = GRID_SIZE_MAX; // Use constant from config
   // Initialize grid with IDs
   let grid = Array(GRID_SIZE).fill(null).map((_, rIdx) =>
     Array(GRID_SIZE).fill(null).map((_, cIdx) => new GridCell(null, `${rIdx}-${cIdx}`))
