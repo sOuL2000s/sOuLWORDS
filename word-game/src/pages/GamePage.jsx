@@ -20,10 +20,23 @@ import {
  * @component
  */
 function GamePage() {
-  const { currentLevel, foundWords, addFoundWord, setLevel, coins, addCoins } = useGameStore();
+  const { 
+    currentLevel, 
+    foundWords, 
+    addFoundWord, 
+    setLevel, 
+    coins, 
+    addCoins, 
+    unlimitedHintsMode, // Get unlimitedHintsMode from store
+    toggleUnlimitedHintsMode // Get toggle action from store
+  } = useGameStore();
 
   // Initial level generation: Use lazy initializer for allLevels
-  const [allLevels] = useState(() => generateGameLevels(NUMBER_OF_DYNAMIC_LEVELS));
+  const [allLevels] = useState(() => {
+    const generatedLevels = generateGameLevels(NUMBER_OF_DYNAMIC_LEVELS);
+    console.log("GamePage: allLevels initialized with", generatedLevels.length, "levels.");
+    return generatedLevels;
+  });
   
   const [shuffledLetters, setShuffledLetters] = useState([]);
   const [currentSelection, setCurrentSelection] = useState([]); // Array of {letter: string, index: number}
@@ -53,6 +66,7 @@ function GamePage() {
   }, [currentLevel, allLevels]);
 
   const levelData = allLevels[currentLevel];
+  console.log(`GamePage: Current levelData for level ${currentLevel}:`, levelData);
 
   const handleWordComplete = useCallback((word) => {
     const uppercaseWord = word.toUpperCase();
@@ -121,7 +135,7 @@ function GamePage() {
   }, [levelData, foundWords, revealedCells]);
 
   const revealHint = useCallback(() => {
-    if (coins < HINT_COST) {
+    if (!unlimitedHintsMode && coins < HINT_COST) { // Check coins only if not in unlimited hints mode
       setInfoMessage("Not enough coins for a hint!");
       clearTimeout(infoMessageTimeoutRef.current);
       infoMessageTimeoutRef.current = setTimeout(() => setInfoMessage(''), WRONG_WORD_DURATION);
@@ -132,7 +146,9 @@ function GamePage() {
 
     if (hintCell) {
       setRevealedCells(prev => ({ ...prev, [`${hintCell.id}`]: true }));
-      addCoins(-HINT_COST);
+      if (!unlimitedHintsMode) { // Deduct coins only if not in unlimited hints mode
+        addCoins(-HINT_COST);
+      }
       setInfoMessage("Hint revealed!");
       clearTimeout(infoMessageTimeoutRef.current);
       infoMessageTimeoutRef.current = setTimeout(() => setInfoMessage(''), WRONG_WORD_DURATION);
@@ -141,9 +157,18 @@ function GamePage() {
       clearTimeout(infoMessageTimeoutRef.current);
       infoMessageTimeoutRef.current = setTimeout(() => setInfoMessage(''), WRONG_WORD_DURATION);
     }
-  }, [coins, getHintCell, addCoins]);
+  }, [coins, getHintCell, addCoins, unlimitedHintsMode]);
 
   if (!levelData || !levelData.grid || !levelData.letters || !levelData.answers) {
+    console.error("GamePage: levelData is invalid or missing required properties.", {
+      levelData: levelData,
+      hasGrid: !!levelData?.grid,
+      hasLetters: !!levelData?.letters,
+      hasAnswers: !!levelData?.answers,
+      gridLength: levelData?.grid?.length,
+      lettersLength: levelData?.letters?.length,
+      answersLength: levelData?.answers?.length
+    });
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-900 to-indigo-900 text-white flex flex-col items-center justify-center text-xl font-bold">
         Loading levels or generating data...
@@ -199,6 +224,14 @@ function GamePage() {
               onShuffleLetters={shuffleLetters} 
               onRevealHint={revealHint} 
             />
+
+            {/* Temporary button to toggle unlimited hints mode for testing */}
+            <button
+              onClick={toggleUnlimitedHintsMode}
+              className="mt-4 px-4 py-2 bg-purple-600 rounded-full hover:bg-purple-700 transition-all active:scale-95 text-xs text-white font-semibold"
+            >
+              Toggle Unlimited Hints ({unlimitedHintsMode ? 'ON' : 'OFF'})
+            </button>
           </div>
         </div>
       </main>
