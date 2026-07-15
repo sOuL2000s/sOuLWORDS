@@ -199,8 +199,8 @@ function GamePage() {
     <>
       <GameHeader />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center p-3 sm:p-5 md:p-6 lg:p-8 z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full justify-items-center">
+      <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center px-2 py-4 sm:p-5 md:p-6 lg:p-8 z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 lg:gap-12 xl:gap-16 items-center w-full justify-items-center">
           {/* Left Column: Game Board */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/10 w-full max-w-md sm:max-w-lg lg:max-w-xl mb-4 lg:mb-0">
             <Grid grid={levelData.grid} foundStatus={mergedFoundStatus} />

@@ -44,15 +44,15 @@ export default function Grid({ grid, foundStatus }) {
               role="gridcell"
               key={cellIndex}
               aria-label={cell.char ? `Letter ${cell.char}` : 'Empty cell'}
-              className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded transition-all duration-500
-              ${cell.char ? 'border-2 bg-white/10' : 'opacity-0'}`}
+              className={`w-5 h-5 min-[400px]:w-7 min-[400px]:h-7 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded transition-all duration-500
+              ${cell.char ? 'border-[1px] sm:border-2 bg-white/10' : 'opacity-0'}`}
             >
               {cell.char && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: isCellRevealed(cell, foundWords, revealedCells) ? 1 : 0 }}
                   transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                  className="text-lg sm:text-xl md:text-2xl font-bold text-white uppercase"
+                  className="text-[10px] min-[400px]:text-sm sm:text-xl md:text-2xl font-bold text-white uppercase"
                 >
                   {cell.char}
                 </motion.span>
